@@ -1,5 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+import random
+from django.utils import timezone
+
 
 # Create your models here.
 class VerificationCode(models.Model):
@@ -21,11 +24,14 @@ class VerificationCode(models.Model):
         return (timezone.now() - self.created_at).total_seconds() < 600 and self.user == user
     
     
-    
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15,unique=True)
     verified = models.BooleanField(default=False)
+    # faculty = models.CharField(max_length=100, blank=True)
+    # department = models.CharField(max_length=100, blank=True)
+    # level = models.IntegerField(default=100)
+    
     
     def __str__(self):
         return self.user.username

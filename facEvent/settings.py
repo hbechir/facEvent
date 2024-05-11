@@ -32,7 +32,8 @@ REST_FRAMEWORK = {
 }
 ALLOWED_HOSTS = []
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 # Application definition
 
 INSTALLED_APPS = [
@@ -45,7 +46,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
-    'user'
+    'user',
+    'club',
+    'event',
 
 
 ]

@@ -26,12 +26,13 @@ class VerificationCode(models.Model):
     
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=100,unique=True)
     phone_number = models.CharField(max_length=15,unique=True)
     verified = models.BooleanField(default=False)
-    # faculty = models.CharField(max_length=100, blank=True)
-    # department = models.CharField(max_length=100, blank=True)
-    # level = models.IntegerField(default=100)
-    
+    is_admin = models.BooleanField(default=False)
+    university = models.CharField(max_length=100, blank=True)
+    department = models.CharField(max_length=100, blank=True)
+    group = models.CharField(max_length=10, blank=True)
     
     def __str__(self):
         return self.user.username

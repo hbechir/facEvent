@@ -14,3 +14,12 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'facEvent.settings')
 
 application = get_wsgi_application()
+
+
+
+# your_project/wsgi.py or your_project/asgi.py
+
+from event.tasks import scheduler
+
+application = get_wsgi_application()
+scheduler.start()

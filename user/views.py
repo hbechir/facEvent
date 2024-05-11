@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import UserSerializer, ProfileSerializer
 from .models import VerificationCode, Profile
+from club.models import Club
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
@@ -33,6 +34,7 @@ def finish_profile(request):
     # Add the authenticated user to the data
     data = request.data.copy()
     data['user'] = request.user.id
+    print(data)
     # Use serializer to create the new profile
     serializer = ProfileSerializer(data=data, context={'request': request})
     if serializer.is_valid():
@@ -44,9 +46,10 @@ def finish_profile(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
+    print(request.data)
     serializer = UserSerializer(data=request.data,context={'request': request})
     if serializer.is_valid():
-        user = User.objects.create_user(password=request.data.get('password'),username=request.data.get('username'))
+        user = User.objects.create_user(password=request.data.get('password'),username=request.data.get('username'),first_name=request.data.get('first_name'),last_name=request.data.get('last_name'))
         if user:
             return Response(status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -62,7 +65,7 @@ def send_code(request):
     try:
         old_verification_code = VerificationCode.objects.get(user=user)
         time_since_code_sent = timezone.now() - old_verification_code.created_at
-        if time_since_code_sent > timedelta(minutes=3):
+        if time_since_code_sent > timedelta(minutes=0):
             old_verification_code.delete()
         else:
             time_left = timedelta(minutes=3) - time_since_code_sent
@@ -105,3 +108,27 @@ def verify(request):
 
     
     return Response({'message': 'User verified successfully'})
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_users(request):
+    if request.user.profile.is_admin == False:
+        return Response({'error': 'You are not authorized to get all users'}, status=status.HTTP_403_FORBIDDEN)
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_managers(request):
+    if request.user.profile.is_admin == False:
+        return Response({'error': 'You are not authorized to get all managers'}, status=status.HTTP_403_FORBIDDEN)
+    # each club has manager field that contains a user 
+    managers = User.objects.filter(club__manager=request.user)
+    serializer = UserSerializer(managers, many=True)
+    return Response(serializer.data)
